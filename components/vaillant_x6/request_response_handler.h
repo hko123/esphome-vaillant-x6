@@ -1,4 +1,6 @@
 #pragma once
+#include "esphome/core/helpers.h"  // HINZUFÜGEN für millis()
+#include <functional>
 
 #define VAILLANT_X6_SERIAL_BUFFER_LEN 100
 #define VAILLANT_X6_RESPONSE_TIMEOUT 2000
