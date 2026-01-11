@@ -1,54 +1,41 @@
 #pragma once
-#include "esphome/components/sensor/sensor.h"
-#include "esphome/components/binary_sensor/binary_sensor.h"
+#include "esphome/core/component.h"
+#include "esphome/components/uart/uart.h"
 #include "request_response_handler.h"
+#include "command.h"
+
 namespace esphome {
 namespace vaillant_x6 {
-class VaillantX6Command : public Command {
+
+class VaillantX6Component : public PollingComponent, public uart::UARTDevice {
   public:
-    virtual ~VaillantX6Command() = default;
-    virtual void process_response(uint8_t* response) = 0;
-    virtual int get_expected_response_length();
-    virtual int get_interval() {
-      return 1;
-    }
-  
-  private:
-    int expected_response_length = 0;
-};
-class GetAnalogueValue2BytesCommand : public VaillantX6Command {
-  public:
-    virtual void process_response(uint8_t* response) override;
-    virtual int get_interval() override {
-        return interval;
-    }
-    int interval = 1;
-    sensor::Sensor* sensor;
+    void setup() override;
+    void loop() override;
+    void update() override;
+    
+    void add_binary_sensor(
+        binary_sensor::BinarySensor* sensor,
+        std::string response_type,
+        std::vector<uint8_t> request_bytes,
+        int poll_interval);
+        
+    void add_sensor(
+        sensor::Sensor* sensor,
+        std::string response_type,
+        std::vector<uint8_t> request_bytes,
+        int poll_interval);
+
+  protected:
+    bool is_response_complete_();
+    bool is_response_valid();
+    uint8_t calc_checksum_of_response();
+    void seek_to_next_command();
+    
+    RequestResponseHandler *request_response_handler;
+    std::vector<VaillantX6Command*> commands;
+    int current_command_idx{-1};
+    uint32_t update_counter{0};
 };
 
-// NEUE KLASSE:
-class GetAnalogueValue1ByteCommand : public VaillantX6Command {
-  public:
-    virtual void process_response(uint8_t* response) override;
-    virtual int get_interval() override {
-        return interval;
-    }
-    int interval = 1;
-    sensor::Sensor* sensor;
-};
-
-class GetOnOffStatusCommand : public VaillantX6Command {
-  public:
-    virtual void process_response(uint8_t* response) override;
-    virtual int get_interval() override {
-        return interval;
-    }
-    std::string object_id;
-    std::string icon;
-    std::string sensor_name;
-    int interval = 1;
-    uint8_t on_value = 0x01;
-    binary_sensor::BinarySensor* sensor;
-};
 } // namespace vaillant_x6
 } // namespace esphome
