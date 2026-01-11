@@ -46,6 +46,7 @@ SENSOR_SCHEMA = sensor.sensor_schema(
 ).extend({
     cv.Required('response_type'): cv.one_of(
         "AnalogueValue2Bytes",
+        "AnalogueValue1Byte",  # NEU HINZUGEFÜGT
         lower=False,
     ),
     cv.Required('command_byte'): cv.hex_int,
