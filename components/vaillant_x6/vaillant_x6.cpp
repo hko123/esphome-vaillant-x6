@@ -134,4 +134,52 @@ uint8_t VaillantX6Component::calc_checksum_of_response() {
         uint8_t byte = request_response_handler->response_buffer[i];
     
         if (checksum & 0x80) {
-            che
+            checksum = (checksum << 1) | 1;
+            checksum = checksum ^ 0x18;
+        } else {
+            checksum = checksum << 1;
+        }
+        checksum = checksum ^ byte;
+    }
+    
+    return checksum;
+}
+
+// -------------------------------------------- 
+// The following methods should be in command.cpp but not sure how to make esphome aware of it
+// -------------------------------------------- 
+
+int VaillantX6Command::get_expected_response_length() {
+    if (request_bytes.size() < 2) {
+        ESP_LOGE(TAG, "Unexpected request_bytes length %d. Must be at least 2", request_bytes.size());
+        return 0;
+    }
+
+    int expected_payload_response_length = request_bytes[request_bytes.size() - 2];
+    return expected_payload_response_length + 3;
+}
+
+// -------------------------------------------- 
+
+void GetAnalogueValue2BytesCommand::process_response(uint8_t* response) {
+    float value = ResponseDecoder::analogueValue2Bytes(response + 2);
+    sensor->publish_state(value);
+}
+
+// -------------------------------------------- 
+// NEUE IMPLEMENTIERUNG HINZUGEFÜGT:
+
+void GetAnalogueValue1ByteCommand::process_response(uint8_t* response) {
+    float value = ResponseDecoder::analogueValue1Byte(response[2]);
+    sensor->publish_state(value);
+}
+
+// -------------------------------------------- 
+
+void GetOnOffStatusCommand::process_response(uint8_t* response) {
+    bool is_on = response[2] == on_value;
+    sensor->publish_state(is_on);
+}
+
+} // namespace vaillant_x6
+} // namespace esphome
