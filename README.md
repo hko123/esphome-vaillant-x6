@@ -20,13 +20,60 @@ Add the `vaillant_x6` and a `uart` component to your ESPHome configuration.
 
 ```yaml
 esphome:
-  name: vaillant_x6
-  platform: ESP32
-  board: esp32dev
+  name: vaillantx6-hko123-web
+
+esp32:
+  board: esp32-c6-devkitc-1
+  framework:
+    type: esp-idf
 
 external_components:
-  - source: github://ulich/esphome-vaillant-x6
+  - source: github://hko123/esphome-vaillant-x6
     components: [ vaillant_x6 ]
+    refresh: 0s
+
+wifi:
+  ssid: !secret wifi_ssid
+  password: !secret wifi_password
+  # Aktiviert das Captive Portal für einfache WiFi-Konfiguration
+  ap:
+    ssid: "Vaillant-X6-Fallback"
+    password: "vaillant123"
+
+# Captive Portal für WiFi-Konfiguration
+captive_portal:
+
+# Web Server aktivieren - Hauptkomponente für die Weboberfläche
+web_server:
+  port: 80
+  version: 3
+  #auth:
+  #  username: !secret web_username
+  #  password: !secret web_password
+  local: true
+  log: false
+  ota: False
+  include_internal: true
+
+# API für Home Assistant Integration
+#api:
+#  encryption:
+#    key: !secret api_encryption_key
+
+# OTA Updates über Web-Interface
+#ota:
+#  - platform: esphome
+#    password: !secret ota_password
+
+# Logger
+logger:
+  level: INFO
+
+mqtt:
+  broker: !secret mqtt_host
+  username: !secret mqtt_username
+  password: !secret mqtt_password
+  id: mqtt_vaillant
 
 uart:
   id: my_uart
@@ -37,119 +84,154 @@ uart:
 vaillant_x6:
   uart_id: my_uart
 
-
-  # built-in sensors:
-  # Remove any sensors you do not need
-
+  # Built-in Sensoren
   flow_temperature_sensor:
-    name: Flow Temperature
-    icon: mdi:thermometer            # the default
-    poll_interval: 10                # 10s, the default
-    accuracy_decimals: 0             # the default
-    unit_of_measurement: °C          # the default
+    name: Vorlauftemperatur
+    icon: mdi:thermometer
+    poll_interval: 10
+    accuracy_decimals: 1
+    unit_of_measurement: °C
 
   flow_target_temperature_sensor:
-    name: Flow Target Temperature
-    icon: mdi:thermometer-alert      # the default
-    poll_interval: 60                # 60s, the default
-    accuracy_decimals: 0             # the default
-    unit_of_measurement: °C          # the default
+    name: Vorlauf Solltemperatur
+    icon: mdi:thermometer-alert
+    poll_interval: 60
+    accuracy_decimals: 1
+    unit_of_measurement: °C
 
   room_thermostat_flow_target_temperature_sensor:
-    name: Room Thermostat Flow Target Temperature
-    icon: mdi:thermometer-alert      # the default
-    poll_interval: 60                # 60s, the default
-    accuracy_decimals: 0             # the default
-    unit_of_measurement: °C          # the default
+    name: Raumthermostat Solltemperatur
+    icon: mdi:thermometer-alert
+    poll_interval: 60
+    accuracy_decimals: 1
+    unit_of_measurement: °C
 
   return_flow_temperature_sensor:
-    name: Return Flow Temperature
-    icon: mdi:thermometer            # the default
-    poll_interval: 10                # 10s, the default
-    accuracy_decimals: 0             # the default
-    unit_of_measurement: °C          # the default
+    name: Ruecklauftemperatur
+    icon: mdi:thermometer
+    poll_interval: 10
+    accuracy_decimals: 1
+    unit_of_measurement: °C
 
   outside_temperature_sensor:
-    name: Outside Temperature
-    icon: mdi:home-thermometer       # the default
-    poll_interval: 60                # 60s, the default
-    accuracy_decimals: 0             # the default
-    unit_of_measurement: °C          # the default
+    name: Aussentemperatur
+    icon: mdi:home-thermometer
+    poll_interval: 60
+    accuracy_decimals: 1
+    unit_of_measurement: °C
 
   tank_temperature_sensor:
-    name: Tank Temperature
-    icon: mdi:thermometer-water      # the default
-    poll_interval: 30                # 30s, the default
-    accuracy_decimals: 0             # the default
-    unit_of_measurement: °C          # the default
+    name: Speichertemperatur
+    icon: mdi:thermometer-water
+    poll_interval: 30
+    accuracy_decimals: 1
+    unit_of_measurement: °C
 
   tank_target_temperature_sensor:
-    name: Tank Target Temperature
-    icon: mdi:thermometer-alert      # the default
-    poll_interval: 60                # 60s, the default
-    accuracy_decimals: 0             # the default
-    unit_of_measurement: °C          # the default
+    name: Speicher Solltemperatur
+    icon: mdi:thermometer-alert
+    poll_interval: 60
+    accuracy_decimals: 1
+    unit_of_measurement: °C
 
   hot_water_temperature_sensor:
-    name: Hot Water Temperature
-    icon: mdi:thermometer-water      # the default
-    poll_interval: 30                # 30s, the default
-    accuracy_decimals: 0             # the default
-    unit_of_measurement: °C          # the default
+    name: Warmwassertemperatur
+    icon: mdi:thermometer-water
+    poll_interval: 30
+    accuracy_decimals: 1
+    unit_of_measurement: °C
 
   hot_water_target_temperature_sensor:
-    name: Hot Water Target Temperature
-    icon: mdi:thermometer-alert      # the default
-    poll_interval: 60                # 60s, the default
-    accuracy_decimals: 0             # the default
-    unit_of_measurement: °C          # the default
+    name: Warmwasser Solltemperatur
+    icon: mdi:thermometer-alert
+    poll_interval: 60
+    accuracy_decimals: 1
+    unit_of_measurement: °C
     
   circulating_pump_sensor:
-    name: Circulating Pump
-    icon: mdi:pump                   # the default
-    poll_interval: 10                # 10s, the default
+    name: Umwaelzpumpe
+    icon: mdi:pump
+    poll_interval: 10
 
   burner_sensor:
-    name: Burner
-    icon: mdi:fire                   # the default
-    poll_interval: 10                # 10s, the default
+    name: Brenner
+    icon: mdi:fire
+    poll_interval: 10
 
   gas_valve_sensor:
-    name: Gas Valve
-    icon: mdi:valve                  # the default
-    poll_interval: 10                # 10s, the default
+    name: Gasventil
+    icon: mdi:valve
+    poll_interval: 10
 
-  winter_mode_sensor:
-    name: Winter Mode
-    icon: mdi:sun-snowflake-variant  # the default
-    poll_interval: 60                # 60s, the default
-
-
-  # Add custom sensors that are not yet built-in (I'm happy to add them, just create an issue or PR).
-  # Check https://old.ethersex.de/index.php/Vaillant_X6_Schnittstelle for possible commands
-
+  # Custom Sensoren
   binary_sensors:
-    - name: Pump Target Status
+    - name: Pumpe Zielstatus
       icon: mdi:pump-off
-      response_type: Status01        # Response 0x01 is ON
+      response_type: Status01
       command_byte: 0xa1
       response_length: 1
-      poll_interval: 10              # 10s, the default is 60s
+      poll_interval: 10
 
-    - name: Igniter
+    - name: Zuendung
       icon: mdi:lightning-bolt
-      response_type: Status0f        # Response 0x0f is ON
+      response_type: Status0f
       command_byte: 0x49
       response_length: 1
-      poll_interval: 10              # 10s, the default is 60s
+      poll_interval: 10
 
   sensors:
-    - name: Solar Collector Temperature No
-      icon: mdi:sun-thermometer
-      unit_of_measurement: °C
-      accuracy_decimals: 1                # the default is 0
-      device_class: temperature
-      response_type: AnalogueValue2Bytes  # Currently, this is the only allowed value. Can also be used with more than 2 response bytes, only the first 2 response bytes will be interpreted
+    - name: Verbleibende Brennersperrzeit
+      icon: mdi:timer-lock
+      unit_of_measurement: min
+      accuracy_decimals: 1
+      device_class: duration
+      response_type: AnalogueValue1Byte
+      command_byte: 0x38
+      response_length: 1
+      poll_interval: 10
+
+# Zusätzliche System-Sensoren für die Weboberfläche
+sensor:
+  - platform: uptime
+    name: Betriebszeit
+    icon: mdi:clock-outline
+    update_interval: 60s
+
+  - platform: wifi_signal
+    name: WiFi Signal
+    icon: mdi:wifi
+    update_interval: 60s
+
+text_sensor:
+  - platform: wifi_info
+    ip_address:
+      name: IP Adresse
+      icon: mdi:ip-network
+    ssid:
+      name: SSID
+      icon: mdi:wifi
+    bssid:
+      name: BSSID
+      icon: mdi:wifi-strength-2
+    mac_address:
+      name: MAC Adresse
+      icon: mdi:network-outline
+
+  - platform: version
+    name: ESPHome Version
+    icon: mdi:information-outline
+
+# Status LED (optional)
+status_led:
+  pin:
+    number: GPIO08
+    inverted: false
+
+# Restart Button über Weboberfläche
+button:
+  - platform: restart
+    name: Neustart
+    icon: mdi:restartbytes, only the first 2 response bytes will be interpreted
       command_byte: 0xb7
       response_length: 3
       poll_interval: 60                   # 60s, the default
