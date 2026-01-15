@@ -8,6 +8,6 @@ class ResponseDecoder {
     
     static float analogueValue1Byte(uint8_t response) {
         int8_t i = static_cast<int8_t>(response);
-        return i;
+        return i / 16.0f;
     }
 };
